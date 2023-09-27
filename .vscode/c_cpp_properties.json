@@ -1,0 +1,14 @@
+{
+    "configurations": [
+        {
+            "name": "Linux",
+            "includePath": [
+                "${workspaceFolder}/**",
+                "/usr/local/include/fbow/",
+                "/usr/local/include/opencv4/" 
+            ]
+        
+        }
+    ],
+    "version": 4
+}

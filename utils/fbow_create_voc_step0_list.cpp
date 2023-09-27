@@ -115,7 +115,7 @@ void saveToFile(string filename,const vector<cv::Mat> &features,  std::string  d
 }
 
 // ----------------------------------------------------------------------------
-
+//代码主要用于从给定的图片列表中提取特征，并将这些特征保存到文件中。它允许用户选择不同的特征提取方法，并使用OpenCV库来完成特征提取的工作。
 int main(int argc,char **argv)
 {
 

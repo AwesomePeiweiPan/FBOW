@@ -1,0 +1,29 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+       {
+            "name": "Image Matching (gdb) Launch",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "/home/peiweipan/fbow/ImageMatch/build/image_matching",
+            "args": [
+                "/home/peiweipan/fbow/vocabularies/orb_mur.fbow",
+                "/home/peiweipan/fbow/TestImages/",
+                "/home/peiweipan/fbow/TestImages/*.png"
+            ],
+            "stopAtEntry": false,
+            "cwd": "/home/peiweipan/fbow/ImageMatch",
+            "environment": [],
+            "externalConsole": false,
+            "MIMode": "gdb",
+            "setupCommands": [
+                {
+                    "description": "Enable pretty-printing for gdb",
+                    "text": "-enable-pretty-printing",
+                    "ignoreFailures": true                    
+                }
+            ],
+            "miDebuggerPath": "/usr/bin/gdb"
+        }
+    ]
+}

@@ -1,7 +1,13 @@
 //loads a vocabulary, and a image. Extracts image feaures and then  compute the bow of the image
 #include <fbow/fbow.h>
 #include <iostream>
+#include <filesystem>
 #include <map>
+#include <fstream>
+
+#include <thread>  // for std::thread
+#include <mutex> 
+
 using namespace std;
 
 // OpenCV
@@ -31,7 +37,7 @@ vector< cv::Mat  >  loadFeatures(std::vector<string> path_to_images, string desc
 
     else throw std::runtime_error("Invalid descriptor");
     assert(!descriptor.empty());
-    vector<cv::Mat>    features;
+    vector<cv::Mat>  features;
 
 
     cout << "Extracting   features..." << endl;
@@ -50,97 +56,173 @@ vector< cv::Mat  >  loadFeatures(std::vector<string> path_to_images, string desc
     return features;
 }
 
+std::mutex mtx;  // Global mutex for scores
+std::mutex scores_mutex;
+
+void processImage(size_t i, fbow::Vocabulary& voc, const vector<vector<cv::Mat>>& features1, const vector<vector<cv::Mat>>& features2, vector<map<double, int>>& scores)
+{
+    fbow::fBow vv = voc.transform(features1[i][0]);
+    map<double, int> score;
+    for (size_t j = 0; j < features2.size(); ++j)
+    {
+        fbow::fBow vv2 = voc.transform(features2[j][0]);
+        double score1 = vv.score(vv, vv2);
+        score.insert(pair<double, int>(score1, j));
+    }
+    mtx.lock();  // Locking the mutex
+    scores[i] = score;
+    mtx.unlock();  // Releasing the mutex
+}
+
+void loadFeaturesForRange1(const std::vector<string>& filenames, const string& desc_name, int startIdx, int endIdx, vector<vector<cv::Mat>>& features) {
+    for (size_t i = startIdx; i < endIdx && i < filenames.size(); ++i) {
+        features[i] = loadFeatures({ filenames[i] }, desc_name);
+    }
+}
+
+void computeScoresForRange(const vector<vector<cv::Mat>>& features1, const vector<vector<cv::Mat>>& features2, fbow::Vocabulary& voc, int startIdx, int endIdx, vector<map<double, int>>& scores) {
+    for (size_t i = startIdx; i < endIdx && i < features1.size(); ++i) {
+        fbow::fBow vv = voc.transform(features1[i][0]);
+        map<double, int> score;
+        for (size_t j = 0; j < features2.size(); ++j) {
+            fbow::fBow vv2 = voc.transform(features2[j][0]);
+            double score1 = vv.score(vv, vv2);
+            score.insert(pair<double, int>(score1, j));
+            cout<<i<<" , "<<j<<endl;
+        }
+        scores_mutex.lock();
+        scores[i] = score;
+        scores_mutex.unlock();
+    }
+}
+
+std::mutex file_mutex; 
+void writeToTxt(const std::vector<std::map<double, int>>& data, const std::string& filename, size_t start, size_t end) {
+    std::ofstream out;
+
+    // 将锁定和文件操作放在同一范围内，确保写入操作的完整性
+    file_mutex.lock();
+    out.open(filename, std::ios::app); // 以追加模式打开
+
+    for (size_t i = start; i < end; ++i) {
+        for (auto const& [key, value] : data[i]) {
+            out << key << "," << value << " ";
+        }
+        out << std::endl;
+        cout<< "Writing for i" <<endl;
+    }
+    
+    out.close();
+    file_mutex.unlock();
+}
+
+int countLinesInFile(const std::string& filename) {
+    std::ifstream in(filename);
+    return std::count(std::istreambuf_iterator<char>(in),
+                      std::istreambuf_iterator<char>(), '\n');
+}
+
+
 int main(int argc, char **argv) {
     CmdLineParser cml(argc, argv);
     try {
-        if (argc<3 || cml["-h"]) throw std::runtime_error("Usage: fbow   image [descriptor]");
+        if (argc<3 || cml["-h"]) throw std::runtime_error("Usage: fbow path_to_imagefile1 path_to_imagefile2");
         fbow::Vocabulary voc;
         voc.readFromFile(argv[1]);
 
         string desc_name = voc.getDescName();
         cout << "voc desc name=" << desc_name << endl;
-        vector<vector<cv::Mat> > features(argc - 3);
-        vector<map<double, int> > scores;
-        vector<string > filenames(argc - 3);
-        string outDir = argv[2];
-        for (int i = 3; i < argc; ++i)
-        {
-            filenames[i - 3] = { argv[i] };
-        }
-        for (size_t i = 0; i<filenames.size(); ++i)
-            features[i] = loadFeatures({ filenames[i] }, desc_name);
 
-        fbow::fBow vv, vv2;
-        int avgScore = 0;
-        int counter = 0;
+        string path_to_imagefile1 = argv[2];
+        string path_to_imagefile2 = argv[3];
+
+
+        vector<string> filenames1;
+        for (const auto& entry : filesystem::directory_iterator(path_to_imagefile1)) {
+            if (entry.is_regular_file()) {
+                 filenames1.push_back(entry.path().string());
+            }
+        }
+        std::sort(filenames1.begin(), filenames1.end());
+        if (filenames1.empty()) { cerr << "Path_to_imagefile1 contains no files. Exiting..." << endl; return 1;}
+        int SizeImages1 = filenames1.size();
+        cout<< "imagefile1 contains" << SizeImages1 << "images" << endl;
+
+
+        vector<string> filenames2;
+        for (const auto& entry : filesystem::directory_iterator(path_to_imagefile2)) {
+            if (entry.is_regular_file()) {
+                 filenames2.push_back(entry.path().string());
+            }
+        }
+        std::sort(filenames2.begin(), filenames2.end());
+        if (filenames2.empty()) {cerr << "Path_to_imagefile2 contains no files. Exiting..." << endl; return 1; }
+        int SizeImages2 = filenames2.size();
+        cout<< "imagefile2 contains" << SizeImages2 << "images" << endl;
+        int TimeCost = 0;
+        
         auto t_start = std::chrono::high_resolution_clock::now();
-        for (size_t i = 0; i<features.size(); ++i)
-        {
-            vv = voc.transform(features[i][0]);
-            map<double, int> score;
-            for (size_t j = 0; j<features.size(); ++j)
-            {
+        
 
-                vv2 = voc.transform(features[j][0]);
-                double score1 = vv.score(vv, vv2);
-                counter++;
-                //		if(score1 > 0.01f)
-                {
-                    score.insert(pair<double, int>(score1, j));
-                }
-                printf("%f, ", score1);
-            }
-            printf("\n");
-            scores.push_back(score);
+
+        vector<vector<cv::Mat> > features1(SizeImages1);
+        vector<vector<cv::Mat> > features2(SizeImages2);
+        vector<map<double, int> > scores;
+        scores.resize(features1.size());
+        fbow::fBow vv, vv2;
+
+        const int numThreads = 2;
+        std::vector<std::thread> threads1;
+        int blockSize1 = SizeImages1 / numThreads;
+        for (int t = 0; t < numThreads; ++t) {
+            threads1.push_back(std::thread(loadFeaturesForRange1, std::ref(filenames1), desc_name, t * blockSize1, (t + 1) * blockSize1, std::ref(features1)));
         }
+        for (auto& th : threads1) {
+            th.join();
+        }
+
+        std::vector<std::thread> threads2;
+        int blockSize2 = SizeImages2 / numThreads;
+        for (int t = 0; t < numThreads; ++t) {
+            threads2.push_back(std::thread(loadFeaturesForRange1, std::ref(filenames2), desc_name, t * blockSize2, (t + 1) * blockSize2, std::ref(features2)));
+        }
+        for (auto& th : threads2) {
+            th.join();
+        }
+
+        //const int numThreads2=14;
+        const int numThreads2=14;
+        std::vector<std::thread> threads3;
+        int blockSize3 = features1.size() / numThreads2;
+        for (int t = 0; t < numThreads2; ++t) {
+            threads3.push_back(std::thread(computeScoresForRange, std::ref(features1), std::ref(features2), std::ref(voc), t * blockSize3, (t + 1) * blockSize3, std::ref(scores)));
+        }
+        for (auto& th : threads3) {
+            th.join();
+        }
+
+
         auto t_end = std::chrono::high_resolution_clock::now();
-        avgScore += double(std::chrono::duration_cast<std::chrono::milliseconds>(t_end - t_start).count());
+        TimeCost = double(std::chrono::duration_cast<std::chrono::seconds>(t_end - t_start).count()) / 60.0;
+        cout << "TimeCost: " << TimeCost <<endl;
 
-        std::string command;
-        int j = 0;
-        for (size_t i = 0; i < scores.size(); i++)
-        {
-            std::stringstream str;
+        std::ofstream clearFile("/home/peiweipan/fbow/ImageMatch/scores.txt", std::ios::out); // 这会清空文件内容
+        clearFile.close();
 
-            command = "mkdir ";
-            str << i;
-            command += str.str();
-            command += "/";
-            system(command.c_str());
-
-            command = "cp ";
-            command += filenames[i];
-            command += " ";
-            command += str.str();
-            command += "/source.JPG";
-            
-        system((string("cd ") + outDir).c_str());
-            system(command.c_str());
-            j = 0;
-            for (auto it = scores[i].begin(); it != scores[i].end(); it++)
-            {
-                ++j;
-                std::stringstream str2;
-                command = "cp ";
-                command += filenames[it->second];
-                command += " ";
-                command += str.str();
-                command += "/";
-                str2 << j << "-";
-                str2 << it->first;
-                command += str2.str();
-                command += ".JPG";
-                system(command.c_str());
-            }
-
+        std::vector<std::thread> threads;
+         size_t blockSize = scores.size() / numThreads2;
+         for (int i = 0; i < numThreads2; ++i) {
+        size_t start = i * blockSize;
+        size_t end = (i == numThreads2 - 1) ? scores.size() : (i + 1) * blockSize;
+        threads.push_back(std::thread(writeToTxt, std::ref(scores), "/home/peiweipan/fbow/ImageMatch/scores.txt", start, end));
         }
-        /*
-        {
-        cout<<vv.begin()->first<<" "<<vv.begin()->second<<endl;
-        cout<<vv.rbegin()->first<<" "<<vv.rbegin()->second<<endl;
+            for (auto& t : threads) {
+                t.join();
         }
-        */
-        std::cout << "avg score: " << avgScore << " # of features: " << features.size() << std::endl;
+
+        int lineCount = countLinesInFile("/home/peiweipan/fbow/ImageMatch/scores.txt");
+        std::cout << "The file has " << lineCount << " lines." << std::endl;
+
     }
     catch (std::exception &ex) {
         cerr << ex.what() << endl;

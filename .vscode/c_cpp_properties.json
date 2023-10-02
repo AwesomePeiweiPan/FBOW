@@ -6,7 +6,8 @@
                 "${workspaceFolder}/**",
                 "/usr/local/include/fbow/",
                 "/usr/local/include/opencv4/" 
-            ]
+            ],
+            "cppStandard": "c++17"
         
         }
     ],

@@ -1,1 +1,6 @@
-build/
+build/*
+ImageMatch/*
+!ImageMatch/CMakeLists.txt
+!ImageMatch/image_matching.cpp
+!ImageMatch/RateAndSelect.cpp
+!ImageMatch/ReIgMch.sh

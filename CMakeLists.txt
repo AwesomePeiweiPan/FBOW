@@ -18,7 +18,7 @@ set(CMAKE_MACOSX_RPATH 1)
 #------------------------------------------------------
 
 IF(NOT CMAKE_BUILD_TYPE )
-   SET( CMAKE_BUILD_TYPE "Release" )
+   SET( CMAKE_BUILD_TYPE "Debug" )
 ENDIF()
 
 #------------------------------------------------------

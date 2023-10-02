@@ -7,9 +7,9 @@
             "request": "launch",
             "program": "/home/peiweipan/fbow/ImageMatch/build/image_matching",
             "args": [
-                "/home/peiweipan/fbow/vocabularies/orb_mur.fbow",
-                "/home/peiweipan/fbow/TestImages/",
-                "/home/peiweipan/fbow/TestImages/*.png"
+                "/home/peiweipan/fbow/ImageMatch/ImagesForVoc/voc.fbow",
+                "/home/peiweipan/fbow/ImageMatch/ImagesForVoc/MH01/mav0/cam0/data/",
+                "/home/peiweipan/fbow/ImageMatch/ImagesForVoc/MH02/mav0/cam0/data/"
             ],
             "stopAtEntry": false,
             "cwd": "/home/peiweipan/fbow/ImageMatch",
@@ -24,6 +24,107 @@
                 }
             ],
             "miDebuggerPath": "/usr/bin/gdb"
-        }
+        },
+
+        {
+            "name": "Test images using my own algr",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "/home/peiweipan/fbow/ImageMatch/build/image_matching",
+            "args": [
+                "/home/peiweipan/fbow/vocabularies/orb_mur.fbow",
+                "/home/peiweipan/fbow/TestImages/",
+                "/home/peiweipan/fbow/TestImages/"
+            ],
+            "stopAtEntry": false,
+            "cwd": "/home/peiweipan/fbow/ImageMatch",
+            "environment": [],
+            "externalConsole": false,
+            "MIMode": "gdb",
+            "setupCommands": [
+                {
+                    "description": "Enable pretty-printing for gdb",
+                    "text": "-enable-pretty-printing",
+                    "ignoreFailures": true                    
+                }
+            ],
+            "miDebuggerPath": "/usr/bin/gdb"
+        },
+        {
+            "name": "Small wide images match",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "/home/peiweipan/fbow/ImageMatch/build/image_matching",
+            "args": [
+                "/home/peiweipan/fbow/ImageMatch/ImagesForVoc/voc.fbow",
+                "/home/peiweipan/fbow/ImageMatch/ImagesForVoc/S01/",
+                "/home/peiweipan/fbow/ImageMatch/ImagesForVoc/S02/"
+
+            ],
+            "stopAtEntry": false,
+            "cwd": "/home/peiweipan/fbow/ImageMatch",
+            "environment": [],
+            "externalConsole": false,
+            "MIMode": "gdb",
+            "setupCommands": [
+                {
+                    "description": "Enable pretty-printing for gdb",
+                    "text": "-enable-pretty-printing",
+                    "ignoreFailures": true                    
+                }
+            ],
+            "miDebuggerPath": "/usr/bin/gdb"
+        },
+        {
+            "name": "Rate And Select",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "/home/peiweipan/fbow/ImageMatch/build/RateAndSelect",
+            "args": [
+                "3682",
+                "14"
+            ],
+            "stopAtEntry": false,
+            "cwd": "/home/peiweipan/fbow/ImageMatch",
+            "environment": [],
+            "externalConsole": false,
+            "MIMode": "gdb",
+            "setupCommands": [
+                {
+                    "description": "Enable pretty-printing for gdb",
+                    "text": "-enable-pretty-printing",
+                    "ignoreFailures": true                    
+                }
+            ],
+            "miDebuggerPath": "/usr/bin/gdb"
+        },
+        {
+            "name": "TestImages Matching official",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "/home/peiweipan/fbow/build/utils/image_matching",
+            "args": [
+                "/home/peiweipan/fbow/vocabularies/orb_mur.fbow",
+                "/home/peiweipan/fbow/TestImages",
+                "/home/peiweipan/fbow/TestImages/image0.png",
+                "/home/peiweipan/fbow/TestImages/image1.png",
+                "/home/peiweipan/fbow/TestImages/image2.png",
+                "/home/peiweipan/fbow/TestImages/image3.png"
+                
+            ],
+            "stopAtEntry": false,
+            "cwd": "/home/peiweipan/fbow/utils/",
+            "environment": [],
+            "externalConsole": false,
+            "MIMode": "gdb",
+            "setupCommands": [
+                {
+                    "description": "Enable pretty-printing for gdb",
+                    "text": "-enable-pretty-printing",
+                    "ignoreFailures": true                    
+                }
+            ],
+            "miDebuggerPath": "/usr/bin/gdb"
+        },
     ]
 }

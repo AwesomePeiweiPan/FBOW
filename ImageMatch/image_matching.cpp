@@ -59,35 +59,20 @@ vector< cv::Mat  >  loadFeatures(std::vector<string> path_to_images, string desc
 std::mutex mtx;  // Global mutex for scores
 std::mutex scores_mutex;
 
-void processImage(size_t i, fbow::Vocabulary& voc, const vector<vector<cv::Mat>>& features1, const vector<vector<cv::Mat>>& features2, vector<map<double, int>>& scores)
-{
-    fbow::fBow vv = voc.transform(features1[i][0]);
-    map<double, int> score;
-    for (size_t j = 0; j < features2.size(); ++j)
-    {
-        fbow::fBow vv2 = voc.transform(features2[j][0]);
-        double score1 = vv.score(vv, vv2);
-        score.insert(pair<double, int>(score1, j));
-    }
-    mtx.lock();  // Locking the mutex
-    scores[i] = score;
-    mtx.unlock();  // Releasing the mutex
-}
-
 void loadFeaturesForRange1(const std::vector<string>& filenames, const string& desc_name, int startIdx, int endIdx, vector<vector<cv::Mat>>& features) {
     for (size_t i = startIdx; i < endIdx && i < filenames.size(); ++i) {
         features[i] = loadFeatures({ filenames[i] }, desc_name);
     }
 }
 
-void computeScoresForRange(const vector<vector<cv::Mat>>& features1, const vector<vector<cv::Mat>>& features2, fbow::Vocabulary& voc, int startIdx, int endIdx, vector<map<double, int>>& scores) {
+void computeScoresForRange(const vector<vector<cv::Mat>>& features1, const vector<vector<cv::Mat>>& features2, fbow::Vocabulary& voc, int startIdx, int endIdx, vector<map<int, double>>& scores) {
     for (size_t i = startIdx; i < endIdx && i < features1.size(); ++i) {
         fbow::fBow vv = voc.transform(features1[i][0]);
-        map<double, int> score;
+        map<int, double> score;
         for (size_t j = 0; j < features2.size(); ++j) {
             fbow::fBow vv2 = voc.transform(features2[j][0]);
             double score1 = vv.score(vv, vv2);
-            score.insert(pair<double, int>(score1, j));
+            score.insert(pair<int, double>(j, score1));
             cout<<i<<" , "<<j<<endl;
         }
         scores_mutex.lock();
@@ -96,7 +81,7 @@ void computeScoresForRange(const vector<vector<cv::Mat>>& features1, const vecto
     }
 }
 
-void writeToTxt(const std::vector<std::map<double, int>>& data, const std::string& filename, size_t start, size_t end) {
+void writeToTxt(const std::vector<std::map<int, double>>& data, const std::string& filename, size_t start, size_t end) {
     std::ofstream out;
     out.open(filename, std::ios::app); // 以追加模式打开
 
@@ -162,7 +147,7 @@ int main(int argc, char **argv) {
 
         vector<vector<cv::Mat> > features1(SizeImages1);
         vector<vector<cv::Mat> > features2(SizeImages2);
-        vector<map<double, int> > scores;
+        vector<map<int, double> > scores;
         scores.resize(features1.size());
         fbow::fBow vv, vv2;
 

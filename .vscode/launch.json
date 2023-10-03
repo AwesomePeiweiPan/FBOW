@@ -105,8 +105,6 @@
             "request": "launch",
             "program": "/home/peiweipan/fbow/ImageMatch/build/RateAndSelect",
             "args": [
-                "3682",
-                "14"
             ],
             "stopAtEntry": false,
             "cwd": "/home/peiweipan/fbow/ImageMatch",

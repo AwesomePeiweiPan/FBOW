@@ -22,6 +22,13 @@ ADD_EXECUTABLE(image_matching image_matching.cpp)
 target_link_libraries(image_matching ${OpenCV_LIBS} ${FBOW_LIBS})
 target_link_libraries(image_matching Threads::Threads)
 
+ADD_EXECUTABLE(SingleTest SingleTest.cpp)
+target_link_libraries(SingleTest ${OpenCV_LIBS} ${FBOW_LIBS})
+
+
+
 ADD_EXECUTABLE(RateAndSelect RateAndSelect.cpp)
 target_link_libraries(RateAndSelect ${OpenCV_LIBS} ${FBOW_LIBS} Threads::Threads)
+
+ADD_EXECUTABLE(SequenceSelect SequenceSelect.cpp)
 

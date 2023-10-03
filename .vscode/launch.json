@@ -25,6 +25,30 @@
             ],
             "miDebuggerPath": "/usr/bin/gdb"
         },
+        {
+            "name": "Single Test",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "/home/peiweipan/fbow/ImageMatch/build/SingleTest",
+            "args": [
+                "/home/peiweipan/fbow/ImageMatch/ImagesForVoc/voc.fbow",
+                "/home/peiweipan/fbow/ImageMatch/ImagesForVoc/MH01/mav0/cam0/data/",
+                "/home/peiweipan/fbow/ImageMatch/ImagesForVoc/MH02/mav0/cam0/data/"
+            ],
+            "stopAtEntry": false,
+            "cwd": "/home/peiweipan/fbow/ImageMatch",
+            "environment": [],
+            "externalConsole": false,
+            "MIMode": "gdb",
+            "setupCommands": [
+                {
+                    "description": "Enable pretty-printing for gdb",
+                    "text": "-enable-pretty-printing",
+                    "ignoreFailures": true                    
+                }
+            ],
+            "miDebuggerPath": "/usr/bin/gdb"
+        },
 
         {
             "name": "Test images using my own algr",
@@ -114,6 +138,27 @@
             ],
             "stopAtEntry": false,
             "cwd": "/home/peiweipan/fbow/utils/",
+            "environment": [],
+            "externalConsole": false,
+            "MIMode": "gdb",
+            "setupCommands": [
+                {
+                    "description": "Enable pretty-printing for gdb",
+                    "text": "-enable-pretty-printing",
+                    "ignoreFailures": true                    
+                }
+            ],
+            "miDebuggerPath": "/usr/bin/gdb"
+        },
+        {
+            "name": "SequenceSelect",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "/home/peiweipan/fbow/ImageMatch/build/SequenceSelect",
+            "args": [
+            ],
+            "stopAtEntry": false,
+            "cwd": "/home/peiweipan/fbow/ImageMatch",
             "environment": [],
             "externalConsole": false,
             "MIMode": "gdb",

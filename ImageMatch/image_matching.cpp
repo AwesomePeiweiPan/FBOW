@@ -96,12 +96,8 @@ void computeScoresForRange(const vector<vector<cv::Mat>>& features1, const vecto
     }
 }
 
-std::mutex file_mutex; 
 void writeToTxt(const std::vector<std::map<double, int>>& data, const std::string& filename, size_t start, size_t end) {
     std::ofstream out;
-
-    // 将锁定和文件操作放在同一范围内，确保写入操作的完整性
-    file_mutex.lock();
     out.open(filename, std::ios::app); // 以追加模式打开
 
     for (size_t i = start; i < end; ++i) {
@@ -109,11 +105,10 @@ void writeToTxt(const std::vector<std::map<double, int>>& data, const std::strin
             out << key << "," << value << " ";
         }
         out << std::endl;
-        cout<< "Writing for i" <<endl;
+        cout << "Writing for" << i << endl;
     }
     
     out.close();
-    file_mutex.unlock();
 }
 
 int countLinesInFile(const std::string& filename) {
@@ -206,19 +201,11 @@ int main(int argc, char **argv) {
         TimeCost = double(std::chrono::duration_cast<std::chrono::seconds>(t_end - t_start).count()) / 60.0;
         cout << "TimeCost: " << TimeCost <<endl;
 
-        std::ofstream clearFile("/home/peiweipan/fbow/ImageMatch/scores.txt", std::ios::out); // 这会清空文件内容
+        std::ofstream clearFile("/home/peiweipan/fbow/ImageMatch/scores.txt", std::ios::out);
         clearFile.close();
 
-        std::vector<std::thread> threads;
-         size_t blockSize = scores.size() / numThreads2;
-         for (int i = 0; i < numThreads2; ++i) {
-        size_t start = i * blockSize;
-        size_t end = (i == numThreads2 - 1) ? scores.size() : (i + 1) * blockSize;
-        threads.push_back(std::thread(writeToTxt, std::ref(scores), "/home/peiweipan/fbow/ImageMatch/scores.txt", start, end));
-        }
-            for (auto& t : threads) {
-                t.join();
-        }
+        // 直接调用写入函数
+        writeToTxt(scores, "/home/peiweipan/fbow/ImageMatch/scores.txt", 0, scores.size());
 
         int lineCount = countLinesInFile("/home/peiweipan/fbow/ImageMatch/scores.txt");
         std::cout << "The file has " << lineCount << " lines." << std::endl;

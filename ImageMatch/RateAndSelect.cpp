@@ -117,7 +117,7 @@ int main(int argc, char **argv){
         cout<< "Getiing max 20" << endl;
     }
 
-     std::vector<SubData> results;
+     std::vector<SubData> BestMatch;
     //计算每组数据的平均值
     for (int i = 0; i < MAXScores.size(); ++i) {
         const auto& m = MAXScores[i];
@@ -130,12 +130,38 @@ int main(int argc, char **argv){
         for (const auto& [key, value] : m) {
             subData.imagesNums2.push_back(key);
         }
-        results.push_back(subData);
+        BestMatch.push_back(subData);
         cout<< "Calculating average values" << endl;
     }
 
     //写入文件
-    writeToFile(results, "/home/peiweipan/fbow/ImageMatch/BestMatch.txt");
+    writeToFile(BestMatch, "/home/peiweipan/fbow/ImageMatch/BestMatch.txt");
+
+
+    //统计
+    std::vector<std::vector<SubData>> categorizedData(12);
+    for (const SubData& data : BestMatch) {
+        if (data.averageValue < 0.01) {
+            categorizedData[0].push_back(data);
+        } else if (data.averageValue < 0.1) {
+            // 注意这里我们使用了static_cast<int>(data.averageValue * 100) - 1
+            // 例如，如果averageValue为0.03，则这会得到2，它指向categorizedData的第三个位置
+            categorizedData[static_cast<int>(data.averageValue * 100) - 1].push_back(data);
+        } else {
+            categorizedData[11].push_back(data);
+        }
+    }
+
+    // 输出每个子数组中的元素个数
+    for (int i = 0; i < categorizedData.size(); ++i) {
+        if (i == 0) {
+            std::cout << "Count of elements with averageValue < 0.01: " << categorizedData[i].size() << std::endl;
+        } else if (i <= 9) {
+            std::cout << "Count of elements with averageValue in (" << i * 0.01 << ", " << (i + 1) * 0.01 << "]: " << categorizedData[i].size() << std::endl;
+        } else {
+            std::cout << "Count of elements with averageValue > 0.1: " << categorizedData[i].size() << std::endl;
+        }
+    }
 
     return 0;
 }

@@ -5,3 +5,6 @@ utils/*
 !ImageMatch/image_matching.cpp
 !ImageMatch/RateAndSelect.cpp
 !ImageMatch/ReIgMch.sh
+!ImageMatch/Sequence.txt
+!ImageMatch/SingleTest.cpp
+!ImageMatch/BestMatch.txt

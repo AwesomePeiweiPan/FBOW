@@ -8,3 +8,10 @@ utils/*
 !ImageMatch/Sequence.txt
 !ImageMatch/SingleTest.cpp
 !ImageMatch/BestMatch.txt
+MH01MH02/*
+Euroc_MH/*
+!Euroc_MH/CMakeLists.txt
+!Euroc_MH/image_matching.cpp
+!Euroc_MH/RateAndSelect.cpp
+!Euroc_MH/Sequence.txt
+!Euroc_MH/scores.txt

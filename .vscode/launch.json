@@ -169,5 +169,50 @@
             ],
             "miDebuggerPath": "/usr/bin/gdb"
         },
+        {
+            "name": "KeyFrames Matching MH01-02",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "/home/peiweipan/fbow/Euroc_MH/build/image_matching",
+            "args": [
+                "/home/peiweipan/fbow/Euroc_MH/Voc/voc.fbow",
+                "/home/peiweipan/fbow/Euroc_MH/KeyFrames/MH01_cam0/",
+                "/home/peiweipan/fbow/Euroc_MH/KeyFrames/MH02_cam0/"
+            ],
+            "stopAtEntry": false,
+            "cwd": "/home/peiweipan/fbow/Euroc_MH",
+            "environment": [],
+            "externalConsole": false,
+            "MIMode": "gdb",
+            "setupCommands": [
+                {
+                    "description": "Enable pretty-printing for gdb",
+                    "text": "-enable-pretty-printing",
+                    "ignoreFailures": true                    
+                }
+            ],
+            "miDebuggerPath": "/usr/bin/gdb"
+        },
+        {
+            "name": "KeyFrames MH01-02 Rate And Select",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "/home/peiweipan/fbow/Euroc_MH/build/RateAndSelect",
+            "args": [
+            ],
+            "stopAtEntry": false,
+            "cwd": "/home/peiweipan/fbow/Euroc_MH/",
+            "environment": [],
+            "externalConsole": false,
+            "MIMode": "gdb",
+            "setupCommands": [
+                {
+                    "description": "Enable pretty-printing for gdb",
+                    "text": "-enable-pretty-printing",
+                    "ignoreFailures": true                    
+                }
+            ],
+            "miDebuggerPath": "/usr/bin/gdb"
+        },
     ]
 }

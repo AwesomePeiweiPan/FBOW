@@ -6,8 +6,13 @@
 #include <thread>  // for std::thread
 #include <mutex> 
 #include <algorithm>
+#include <string>
+#include <vector>
+#include <regex>
+
 
 using namespace std;
+namespace fs = std::filesystem;
 
 //设定阈值 
 //在Images0中至少连续多少张图片才被认定为有效图片
@@ -57,7 +62,7 @@ bool readFromTxt(const std::string& filename, std::vector<std::map<int, double>>
         while (iss >> kv) {
             size_t pos = kv.find(",");
             if (pos != std::string::npos) {
-                int key = std::stoi(kv.substr(0, pos));
+                int key = std::stoll(kv.substr(0, pos));
                 double value = std::stod(kv.substr(pos + 1));
                 mapData[key] = value;
             } else {
@@ -231,6 +236,127 @@ void writeGroupedSequencesToFile(const std::vector<GroupedSequence>& groupedSequ
     outfile.close();
 }
 
+std::vector<std::string> getSortedFiles(const fs::path& path) {
+    std::regex r(R"((\d+).png)");
+    std::vector<std::pair<long long, std::string>> numberedFiles;
+
+    for (const auto& entry : fs::directory_iterator(path)) {
+        std::string filePath = entry.path().string();
+        std::smatch match;
+        if (std::regex_search(filePath, match, r)) {
+            numberedFiles.emplace_back(std::stoll(match[1].str()), entry.path().string());
+        }
+    }
+
+    std::sort(numberedFiles.begin(), numberedFiles.end(), [](const auto& a, const auto& b) {
+        return a.first < b.first;
+    });
+
+    std::vector<std::string> sortedFiles;
+    for (const auto& pair : numberedFiles) {
+        sortedFiles.push_back(pair.second);
+    }
+
+    return sortedFiles;
+}
+
+int copyFiles(const std::vector<std::string>& sourceFiles, const std::vector<int>& indices,
+              const std::string& destDir, int currentPrefix, bool reverse = false) {
+    if (reverse) {
+        for (auto it = indices.rbegin(); it != indices.rend(); ++it) {
+            fs::path sourcePath = sourceFiles[*it];
+            fs::path destDirPath(destDir);
+            fs::path destFilePath = destDirPath / (std::to_string(currentPrefix) + "_" + sourcePath.filename().string());
+            fs::copy(sourcePath, destFilePath, fs::copy_options::overwrite_existing);
+            ++currentPrefix;
+        }
+    } else {
+        for (auto it = indices.begin(); it != indices.end(); ++it) {
+            fs::path sourcePath = sourceFiles[*it];
+            fs::path destDirPath(destDir);
+            fs::path destFilePath = destDirPath / (std::to_string(currentPrefix) + "_" + sourcePath.filename().string());
+            fs::copy(sourcePath, destFilePath, fs::copy_options::overwrite_existing);
+            ++currentPrefix;
+        }
+    }
+    return currentPrefix;  // 返回最后的prefix，便于下次调用
+}
+
+
+void clear_directory(const fs::path &dir) {
+    for (const auto &entry : fs::directory_iterator(dir)) {
+        fs::remove_all(entry.path());
+    }
+}
+
+// 新增函数来处理cam0和cam1的文件夹，避免重复代码
+void handleCameraFolder(const GroupedSequence& seq, const fs::path& camPath, 
+                        const std::vector<std::string>& sortedFiles1, 
+                        const std::vector<std::string>& sortedFiles2) {
+
+    int subDirIdx = 0;
+    for (size_t i = 0; i < seq.groupedSecondSets.size(); i++) {
+        fs::path subDirPath = camPath / ("sub" + std::to_string(subDirIdx));
+        fs::create_directories(subDirPath);
+
+        // Copy from first path
+        int currentPrefix = copyFiles(sortedFiles1, seq.firstSet, subDirPath.string(), 1);
+        // Copy from second path
+        if (seq.orders[i] == "ReverseOrder") {
+            copyFiles(sortedFiles2, seq.groupedSecondSets[i], subDirPath.string(), currentPrefix, true);
+        } else if (seq.orders[i] == "Order") {
+            copyFiles(sortedFiles2, seq.groupedSecondSets[i], subDirPath.string(), currentPrefix);
+        }
+
+        subDirIdx++;
+    }
+}
+
+void createAndCopyFolders(const std::string& path1, const std::string& path2, 
+                          const std::string& path3, const std::string& path4, // 新增path3和path4
+                          const std::string& destBasePath,
+                          const std::vector<GroupedSequence>& BestSequences) {
+
+    // 在运行函数前，清空destBasePath路径下的所有内容，并删除该路径
+    if (fs::exists(destBasePath)) {
+        fs::remove_all(destBasePath);
+    }
+    fs::create_directories(destBasePath);  // 重新创建destBasePath目录
+
+    auto sortedFiles1 = getSortedFiles(path1);
+    auto sortedFiles2 = getSortedFiles(path2);
+    auto sortedFiles3 = getSortedFiles(path3); // 新增sortedFiles3
+    auto sortedFiles4 = getSortedFiles(path4); // 新增sortedFiles4
+
+    int sequenceDirIdx = 0; 
+
+    for (const auto& seq : BestSequences) {
+        fs::path currentSeqPath = fs::path(destBasePath) / std::to_string(sequenceDirIdx);
+        
+        // 处理cam0
+        fs::path cam0Path = currentSeqPath / "cam0";
+        if (fs::exists(cam0Path)) {
+            clear_directory(cam0Path);
+        }
+        fs::create_directories(cam0Path);
+        handleCameraFolder(seq, cam0Path, sortedFiles1, sortedFiles2);
+
+        // 处理cam1
+        fs::path cam1Path = currentSeqPath / "cam1"; // 新的cam1路径
+        if (fs::exists(cam1Path)) {
+            clear_directory(cam1Path);
+        }
+        fs::create_directories(cam1Path);
+        handleCameraFolder(seq, cam1Path, sortedFiles3, sortedFiles4); // 使用sortedFiles3和sortedFiles4
+
+        sequenceDirIdx++;
+    }
+}
+
+
+
+
+
 
 
 
@@ -314,6 +440,14 @@ int main(int argc, char **argv){
 
     writeGroupedSequencesToFile(BestSequences, "/home/peiweipan/fbow/Euroc_MH/Sequence.txt");
 
+    std::string outputFolder = "/home/peiweipan/fbow/Euroc_MH/KeyFrames/MH01_02_Loop";  // 替换为你的输出文件夹路径
+    const string MH01_cam0 = "/home/peiweipan/fbow/Euroc_MH/KeyFrames/MH01_cam0";
+    const string MH02_cam0 = "/home/peiweipan/fbow/Euroc_MH/KeyFrames/MH02_cam0";
+    const string MH01_cam1 = "/home/peiweipan/fbow/Euroc_MH/KeyFrames/MH01_cam1";
+    const string MH02_cam1 = "/home/peiweipan/fbow/Euroc_MH/KeyFrames/MH02_cam1";
+
+
+    createAndCopyFolders(MH01_cam0, MH02_cam0, MH01_cam1, MH02_cam1, outputFolder, BestSequences);
 
 
 

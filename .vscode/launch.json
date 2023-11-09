@@ -1,6 +1,53 @@
 {
     "version": "0.2.0",
     "configurations": [
+        {
+            "name": "Group Sequence Set",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "/home/peiweipan/fbow/Pairs/build/Group_Sequence_Set",
+            "args": [],
+            "stopAtEntry": false,
+            "cwd": "/home/peiweipan/fbow/Pairs",
+            "environment": [],
+            "externalConsole": false,
+            "MIMode": "gdb",
+            "setupCommands": [
+                {
+                    "description": "Enable pretty-printing for gdb",
+                    "text": "-enable-pretty-printing",
+                    "ignoreFailures": true                    
+                }
+            ],
+            "miDebuggerPath": "/usr/bin/gdb"
+        },
+        {
+            "name": "Loop Created",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "/home/peiweipan/fbow/Pairs/build/Loop_Created",
+            "args": [],
+            "stopAtEntry": false,
+            "cwd": "/home/peiweipan/fbow/Pairs",
+            "environment": [],
+            "externalConsole": false,
+            "MIMode": "gdb",
+            "setupCommands": [
+                {
+                    "description": "Enable pretty-printing for gdb",
+                    "text": "-enable-pretty-printing",
+                    "ignoreFailures": true                    
+                }
+            ],
+            "miDebuggerPath": "/usr/bin/gdb"
+        },
+
+
+
+
+
+
+
        {
             "name": "Image Matching (gdb) Launch",
             "type": "cppdbg",

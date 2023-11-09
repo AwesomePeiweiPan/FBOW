@@ -15,3 +15,7 @@ Euroc_MH/*
 !Euroc_MH/RateAndSelect.cpp
 !Euroc_MH/Sequence.txt
 !Euroc_MH/scores.txt
+
+Pairs/build/*
+Pairs/Voc/*
+Euroc_Maps/*

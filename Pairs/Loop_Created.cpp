@@ -12,13 +12,13 @@ using namespace std;
 namespace fs = std::filesystem;
 
 //分数高于多少才被认为有共视；默认0.02，自动化，如果没有合适的结果，会降低这个值
-double thresholdScore = 0.02; 
+double thresholdScore = 0.03; 
 //在Images0中至少连续多少张图片才被认定为有效图片 默认5
-const int ConsecutiveImages = 5;
+const int ConsecutiveImages = 10;
 //在Images0中相邻照片序数相差多少才合适 默认3
 const int neighborThresholdImages0=1;
 //在Images1中每个组至少要有多少张照片 默认4
-const double thresholdSecondConseutiveImages = 4;
+const double thresholdSecondConseutiveImages = 10;
 //在Images1中相邻照片序数相差多少才合适 默认3
 const int neighborThreshold = 1;
 //////基本的文件路径
@@ -228,12 +228,25 @@ std::vector<Sequence> transformToSequence(const std::vector<std::vector<SubData>
 
 std::vector<GroupedSequence> groupSecondSets(const std::vector<Sequence>& sequences,
                                              const std::vector<std::map<int, double>>& scores) {
+    int N1 = scores.size();  // scores中的vector元素个数
+    int N2 = scores.empty() ? 0 : scores[0].size();  // scores中第0个vector元素中的map元素个数
+
     std::vector<GroupedSequence> groupedSequences;
 
     for (const auto& seq : sequences) {
         GroupedSequence gSeq;
         gSeq.firstSet = seq.firstSet;
-        int a = gSeq.firstSet.back();  // firstSet的最后一个值
+
+        // 逐个添加数字至gSeq.firstSet，直到达到40个元素或数字小于0
+        while (gSeq.firstSet.size() < 40) {
+            int nextNumber = gSeq.firstSet.front() - 1;
+            if (nextNumber < 0) {
+                break;
+            }
+            gSeq.firstSet.insert(gSeq.firstSet.begin(), nextNumber);
+        }
+
+        int a = gSeq.firstSet.back();
 
         std::vector<int> currentGroup;
         for (size_t i = 1; i < seq.secondSet.size(); ++i) {
@@ -241,29 +254,31 @@ std::vector<GroupedSequence> groupSecondSets(const std::vector<Sequence>& sequen
                 currentGroup.push_back(seq.secondSet[i-1]);
                 if (i == seq.secondSet.size() - 1) {
                     currentGroup.push_back(seq.secondSet[i]);
-                    if (currentGroup.size() > thresholdSecondConseutiveImages) {
-                        gSeq.groupedSecondSets.push_back(currentGroup);
-                        int b = currentGroup[0];
-                        int c = currentGroup.back();
-                        if (scores.at(a).at(b) > scores.at(a).at(c)) {
-                            gSeq.orders.push_back("Order");
-                        } else {
-                            gSeq.orders.push_back("ReverseOrder");
-                        }
-                        currentGroup.clear();
-                    }
                 }
             } else {
                 if (currentGroup.size() > thresholdSecondConseutiveImages) {
-                    gSeq.groupedSecondSets.push_back(currentGroup);
                     int b = currentGroup[0];
                     int c = currentGroup.back();
+                    std::string order;
                     if (scores.at(a).at(b) > scores.at(a).at(c)) {
-                        gSeq.orders.push_back("Order");
+                        order = "Order";
                     } else {
-                        gSeq.orders.push_back("ReverseOrder");
+                        order = "ReverseOrder";
                     }
-                    
+
+                    // 逐个添加数字至currentGroup，直到达到50个元素，同时确保数字在合理范围内
+                    if (order == "Order") {
+                        while (currentGroup.size() < 100 && currentGroup.back() < N2 - 1) {
+                            currentGroup.push_back(currentGroup.back() + 1);
+                        }
+                    } else { // ReverseOrder
+                        while (currentGroup.size() < 100 && currentGroup.front() > 0) {
+                            currentGroup.insert(currentGroup.begin(), currentGroup.front() - 1);
+                        }
+                    }
+
+                    gSeq.groupedSecondSets.push_back(currentGroup);
+                    gSeq.orders.push_back(order);
                 }
                 currentGroup.clear();
             }
@@ -276,6 +291,10 @@ std::vector<GroupedSequence> groupSecondSets(const std::vector<Sequence>& sequen
     
     return groupedSequences;
 }
+
+
+
+
 
 std::vector<std::string> getSortedFiles(const fs::path& path) {
     std::regex r(R"((\d+).png)");

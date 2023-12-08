@@ -2,6 +2,55 @@
     "version": "0.2.0",
     "configurations": [
         {
+            "name": "Create Voc Step 1",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "/home/peiweipan/fbow/VocCreate/build/fbow_create_voc_step1",
+            "args": [
+                "/home/peiweipan/fbow/VocCreate/Features.dat",
+                "/home/peiweipan/fbow/VocCreate/Voc_Hilti_Euroc.bow"
+            ],
+            "stopAtEntry": false,
+            "cwd": "/home/peiweipan/fbow/VocCreate",
+            "environment": [],
+            "externalConsole": false,
+            "MIMode": "gdb",
+            "setupCommands": [
+                {
+                    "description": "Enable pretty-printing for gdb",
+                    "text": "-enable-pretty-printing",
+                    "ignoreFailures": true                    
+                }
+            ],
+            "miDebuggerPath": "/usr/bin/gdb"
+            
+        },
+        {
+            "name": "Create Voc Step 0",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "/home/peiweipan/fbow/VocCreate/build/fbow_create_voc_step0",
+            "args": [
+                "orb",
+                "/home/peiweipan/fbow/VocCreate/Features.dat",
+                "/home/peiweipan/fbow/VocCreate/ImagesSource.txt"
+            ],
+            "stopAtEntry": false,
+            "cwd": "/home/peiweipan/fbow/VocCreate",
+            "environment": [],
+            "externalConsole": false,
+            "MIMode": "gdb",
+            "setupCommands": [
+                {
+                    "description": "Enable pretty-printing for gdb",
+                    "text": "-enable-pretty-printing",
+                    "ignoreFailures": true                    
+                }
+            ],
+            "miDebuggerPath": "/usr/bin/gdb"
+            
+        },
+        {
             "name": "Group Sequence Set",
             "type": "cppdbg",
             "request": "launch",

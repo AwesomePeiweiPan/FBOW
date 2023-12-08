@@ -19,3 +19,6 @@ Euroc_MH/*
 Pairs/build/*
 Pairs/Voc/*
 Euroc_Maps/*
+VocCreate/build
+VocCreate/Features.dat
+VocCreate/Voc_Hilti_Euroc.bow

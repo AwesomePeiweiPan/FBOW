@@ -62,7 +62,8 @@ vector< cv::Mat  >  loadFeatures( std::vector<string> path_to_images,string desc
         }
         fdetector->detectAndCompute(image, cv::Mat(), keypoints, descriptors);
         cout<<"extracting features: total= "<<keypoints.size() <<endl;
-        features.push_back(descriptors);
+        if (descriptors.rows != 0){
+            features.push_back(descriptors);}
         cout<<"done detecting features"<<endl;
     }
     return features;
@@ -154,10 +155,6 @@ int main(int argc, char **argv) {
             auto images = readImagePathsFromFolder(folder);
             auto folderFeatures = loadFeatures(images, descriptor);
             features.insert(features.end(), folderFeatures.begin(), folderFeatures.end());
-            // 移除rows为0的元素
-            features.erase(std::remove_if(features.begin(), features.end(), 
-                         [](const cv::Mat &f) { return f.rows == 0; }), 
-                         features.end());
         }
 
         // 保存特征到文件

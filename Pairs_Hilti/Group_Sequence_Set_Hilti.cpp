@@ -27,27 +27,28 @@ namespace fs = std::filesystem;
 
 //////需要修改的参数
 //voc文件路径
-string vocabularyPath = "/home/peiweipan/fbow/Pairs/Voc/voc.fbow";
+string vocabularyPath = "/home/peiweipan/fbow/Pairs_Hilti/Voc/vocHilti.fbow";
+//string vocabularyPath = "/home/peiweipan/fbow/Pairs/Voc/voc.fbow";
+
 //图片源
 vector<string> imageSequenceFolders = {
-    "/home/peiweipan/Projects/DroidSlam/EurocData/KeyFrames/cam0/MH01",
-    "/home/peiweipan/Projects/DroidSlam/EurocData/KeyFrames/cam0/MH02",
-    "/home/peiweipan/Projects/DroidSlam/EurocData/KeyFrames/cam0/MH03",
-    "/home/peiweipan/Projects/DroidSlam/EurocData/KeyFrames/cam0/MH04",
-    "/home/peiweipan/Projects/DroidSlam/EurocData/KeyFrames/cam0/MH05",
+    "/home/peiweipan/Projects/DroidSlam/HiltiData/KeyframesInte/cam0/handheld01",
+    "/home/peiweipan/Projects/DroidSlam/HiltiData/KeyframesInte/cam0/handheld02",
+    "/home/peiweipan/Projects/DroidSlam/HiltiData/KeyframesInte/cam0/handheld03",
+    "/home/peiweipan/Projects/DroidSlam/HiltiData/KeyframesInte/cam0/handheld04",
 };
 //得到分数后，需要输出的地方
-string outputScoresPath = "/home/peiweipan/fbow/Euroc_Maps";
+string outputScoresPath = "/home/peiweipan/fbow/Hilti_Maps";
 //增加线程提高效率
 const int numThreads = 24;
 //在第一次运行的时候设置为false，以后设置为true，大大提高运行速度
-bool scoresFileHasBeenSaved = true;
+bool scoresFileHasBeenSaved = false;
 //设置合适的阈值，保证每对图片组都有一定的关联性
 const double relationScoresThreads = 0.005;
 //设置从哪个地图开始
 const int OriginalStartMap = 1;
 //将匹配好的图片组对输出到一个地方
-string outputGroupSequencePath = "/home/peiweipan/fbow/Euroc_Maps/GroupSequence/GroupSequence.txt"; 
+string outputGroupSequencePath = "/home/peiweipan/fbow/Hilti_Maps/GroupSequence/GroupSequence.txt"; 
 //////
 
 
@@ -229,8 +230,7 @@ std::vector<Edge> applyPrimAlgorithmForMaxTree(const std::vector<Edge>& edges, i
 
     // 假设起始节点是0（或者选择任何一个节点作为起始节点）
     selectedNodes.insert(OriginalStartMap-1);
-
-    // 初始化边的优先队列
+    // 初始化边的优先队列4
     std::map<int, std::vector<Edge>> adjList;
     for (const auto& edge : edges) {
         adjList[edge.v1].push_back(edge);

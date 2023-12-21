@@ -2,13 +2,99 @@
     "version": "0.2.0",
     "configurations": [
         {
+            "name": "VMap Group Sequence Set",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "/home/peiweipan/fbow/Pairs_VMap/build/Group_Sequence_Set",
+            "args": [],
+            "stopAtEntry": false,
+            "cwd": "/home/peiweipan/fbow/Pairs_VMap",
+            "environment": [],
+            "externalConsole": false,
+            "MIMode": "gdb",
+            "setupCommands": [
+                {
+                    "description": "Enable pretty-printing for gdb",
+                    "text": "-enable-pretty-printing",
+                    "ignoreFailures": true                    
+                }
+            ],
+            "miDebuggerPath": "/usr/bin/gdb"
+        },
+        {
+            "name": "VMap Loop Created",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "/home/peiweipan/fbow/Pairs_VMap/build/Loop_Created",
+            "args": [],
+            "stopAtEntry": false,
+            "cwd": "/home/peiweipan/fbow/Pairs_VMap",
+            "environment": [],
+            "externalConsole": false,
+            "MIMode": "gdb",
+            "setupCommands": [
+                {
+                    "description": "Enable pretty-printing for gdb",
+                    "text": "-enable-pretty-printing",
+                    "ignoreFailures": true                    
+                }
+            ],
+            "miDebuggerPath": "/usr/bin/gdb"
+        },
+
+
+
+
+
+
+        {
+            "name": "Hilti Group Sequence Set",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "/home/peiweipan/fbow/Pairs_Hilti/build/Group_Sequence_Set_Hilti",
+            "args": [],
+            "stopAtEntry": false,
+            "cwd": "/home/peiweipan/fbow/Pairs_Hilti",
+            "environment": [],
+            "externalConsole": false,
+            "MIMode": "gdb",
+            "setupCommands": [
+                {
+                    "description": "Enable pretty-printing for gdb",
+                    "text": "-enable-pretty-printing",
+                    "ignoreFailures": true                    
+                }
+            ],
+            "miDebuggerPath": "/usr/bin/gdb"
+        },
+        {
+            "name": "Hilti Loop Created",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "/home/peiweipan/fbow/Pairs_Hilti/build/Loop_Created_Hilti",
+            "args": [],
+            "stopAtEntry": false,
+            "cwd": "/home/peiweipan/fbow/Pairs_Hilti",
+            "environment": [],
+            "externalConsole": false,
+            "MIMode": "gdb",
+            "setupCommands": [
+                {
+                    "description": "Enable pretty-printing for gdb",
+                    "text": "-enable-pretty-printing",
+                    "ignoreFailures": true                    
+                }
+            ],
+            "miDebuggerPath": "/usr/bin/gdb"
+        },
+        {
             "name": "Create Voc Step 1",
             "type": "cppdbg",
             "request": "launch",
             "program": "/home/peiweipan/fbow/VocCreate/build/fbow_create_voc_step1",
             "args": [
                 "/home/peiweipan/fbow/VocCreate/Features.dat",
-                "/home/peiweipan/fbow/VocCreate/Voc_Hilti_Euroc.bow"
+                "/home/peiweipan/fbow/VocCreate/vocHilti.fbow",
             ],
             "stopAtEntry": false,
             "cwd": "/home/peiweipan/fbow/VocCreate",

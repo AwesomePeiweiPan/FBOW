@@ -64,8 +64,8 @@ int main(int argc,char **argv)
         fbow::VocabularyCreator::Params params;
         params.k = stoi(cml("-k","20"));
         params.L = stoi(cml("-l","6"));
-        params.nthreads=stoi(cml("-t","1"));
-        params.maxIters=std::stoi (cml("-maxIters","0"));
+        params.nthreads=stoi(cml("-t","20"));
+        params.maxIters=std::stoi (cml("-maxIters","10"));
         params.verbose=cml["-v"];                     
         srand(0);
         fbow::VocabularyCreator voc_creator;

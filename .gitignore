@@ -22,3 +22,11 @@ Euroc_Maps/*
 VocCreate/build
 VocCreate/Features.dat
 VocCreate/Voc_Hilti_Euroc.bow
+
+Pairs_Hilti/build/*
+Pairs_Hilti/Voc/*
+Hilti_Maps/*
+
+Pairs_VMap
+Vmap_Maps/*
+

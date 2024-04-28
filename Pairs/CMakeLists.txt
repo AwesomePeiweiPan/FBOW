@@ -24,3 +24,6 @@ target_link_libraries(Group_Sequence_Set ${OpenCV_LIBS} ${FBOW_LIBS} Threads::Th
 ADD_EXECUTABLE(Loop_Created Loop_Created.cpp)
 target_link_libraries(Loop_Created ${OpenCV_LIBS} ${FBOW_LIBS} Threads::Threads)
 
+ADD_EXECUTABLE(New_Loop_Created New_Loop.cpp)
+target_link_libraries(New_Loop_Created ${OpenCV_LIBS} ${FBOW_LIBS} Threads::Threads)
+

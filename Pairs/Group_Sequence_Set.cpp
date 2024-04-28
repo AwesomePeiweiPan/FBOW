@@ -30,24 +30,24 @@ namespace fs = std::filesystem;
 string vocabularyPath = "/home/peiweipan/fbow/Pairs/Voc/voc.fbow";
 //图片源
 vector<string> imageSequenceFolders = {
-    "/home/peiweipan/Projects/DroidSlam/EurocData/KeyFrames/cam0/MH01",
-    "/home/peiweipan/Projects/DroidSlam/EurocData/KeyFrames/cam0/MH02",
-    "/home/peiweipan/Projects/DroidSlam/EurocData/KeyFrames/cam0/MH03",
-    "/home/peiweipan/Projects/DroidSlam/EurocData/KeyFrames/cam0/MH04",
-    "/home/peiweipan/Projects/DroidSlam/EurocData/KeyFrames/cam0/MH05",
+    "/home/peiweipan/Projects/DroidSlam/Euroc_Data/KeyFrames_more/cam0/MH01",
+    "/home/peiweipan/Projects/DroidSlam/Euroc_Data/KeyFrames_more/cam0/MH02",
+    "/home/peiweipan/Projects/DroidSlam/Euroc_Data/KeyFrames_more/cam0/MH03",
+    "/home/peiweipan/Projects/DroidSlam/Euroc_Data/KeyFrames_more/cam0/MH04",
+    "/home/peiweipan/Projects/DroidSlam/Euroc_Data/KeyFrames_more/cam0/MH05",
 };
 //得到分数后，需要输出的地方
-string outputScoresPath = "/home/peiweipan/fbow/Euroc_Maps";
+string outputScoresPath = "/home/peiweipan/fbow/Euroc_Data_more";
 //增加线程提高效率
 const int numThreads = 24;
 //在第一次运行的时候设置为false，以后设置为true，大大提高运行速度
-bool scoresFileHasBeenSaved = true;
+bool scoresFileHasBeenSaved = false;
 //设置合适的阈值，保证每对图片组都有一定的关联性
 const double relationScoresThreads = 0.005;
 //设置从哪个地图开始
 const int OriginalStartMap = 1;
 //将匹配好的图片组对输出到一个地方
-string outputGroupSequencePath = "/home/peiweipan/fbow/Euroc_Maps/GroupSequence/GroupSequence.txt"; 
+string outputGroupSequencePath = "/home/peiweipan/fbow/Euroc_Data_more/GroupSequence/GroupSequence.txt"; 
 //////
 
 

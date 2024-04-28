@@ -23,14 +23,14 @@ const double thresholdSecondConseutiveImages = 10;
 const int neighborThreshold = 1;
 //////基本的文件路径
 //地图匹配结果
-std::string GroupSequence = "/home/peiweipan/fbow/Euroc_Maps/GroupSequence/GroupSequence.txt"; 
+std::string GroupSequence = "/home/peiweipan/fbow/Euroc_Data/GroupSequence/GroupSequence.txt"; 
 //Scores所在的文件夹地址
-std::string ScoresFiles = "/home/peiweipan/fbow/Euroc_Maps"; 
+std::string ScoresFiles = "/home/peiweipan/fbow/Euroc_Data"; 
 //关键帧源文件
-std::string cam0_Images = "/home/peiweipan/Projects/DroidSlam/EurocData/KeyFrames/cam0"; 
-std::string cam1_Images = "/home/peiweipan/Projects/DroidSlam/EurocData/KeyFrames/cam1"; 
+std::string cam0_Images = "/home/peiweipan/Projects/DroidSlam/Euroc_Data/KeyFrames/cam0"; 
+std::string cam1_Images = "/home/peiweipan/Projects/DroidSlam/Euroc_Data/KeyFrames/cam1"; 
 //输出回环的文件夹
-fs::path loop_Output = "/home/peiweipan/Projects/DroidSlam/EurocData/Loop";
+fs::path loop_Output = "/home/peiweipan/Projects/DroidSlam/Euroc_Data/Loop";
 
 
 

@@ -11,26 +11,37 @@
 using namespace std;
 namespace fs = std::filesystem;
 
+
+
+std::vector<std::tuple<double, int, int, double, int>> parameters = {
+    {0.02, 5, 1, 5, 1},
+    {0.01, 5, 1, 5, 1},
+    //{0.005, 5, 1, 5, 1},
+    {0.01, 5, 1, 5, 1},
+    //{0.02, 5, 1, 5, 1},
+    {0.01, 10, 1, 10, 1}
+};
+
 //分数高于多少才被认为有共视；默认0.02，自动化，如果没有合适的结果，会降低这个值
-double thresholdScore = 0.005; 
+//double thresholdScore = 0.01; 
 //在Images0中至少连续多少张图片才被认定为有效图片 默认5
-const int ConsecutiveImages = 5;
+//const int ConsecutiveImages = 5;
 //在Images0中相邻照片序数相差多少才合适 默认3
-const int neighborThresholdImages0=3;
+//const int neighborThresholdImages0=1;
 //在Images1中每个组至少要有多少张照片 默认4
-const double thresholdSecondConseutiveImages = 5;
+//const double thresholdSecondConseutiveImages = 5;
 //在Images1中相邻照片序数相差多少才合适 默认3
-const int neighborThreshold = 3;
+//const int neighborThreshold = 1;
 //////基本的文件路径
 //地图匹配结果
-std::string GroupSequence = "/home/peiweipan/fbow/Euroc_Maps/GroupSequence/GroupSequence_Single.txt"; 
+std::string GroupSequence = "/home/peiweipan/fbow/Euroc_Data_more/GroupSequence/GroupSequence.txt"; 
 //Scores所在的文件夹地址
-std::string ScoresFiles = "/home/peiweipan/fbow/Euroc_Maps_Improve"; 
+std::string ScoresFiles = "/home/peiweipan/fbow/Euroc_Data_more/"; 
 //关键帧源文件
-std::string cam0_Images = "/home/peiweipan/Projects/DroidSlam/EurocData/KeyFrames_Improve/cam0"; 
-std::string cam1_Images = "/home/peiweipan/Projects/DroidSlam/EurocData/KeyFrames_Improve/cam1"; 
+std::string cam0_Images = "/home/peiweipan/Projects/DroidSlam/Euroc_Data/KeyFrames_more/cam0"; 
+std::string cam1_Images = "/home/peiweipan/Projects/DroidSlam/Euroc_Data/KeyFrames_more/cam1"; 
 //输出回环的文件夹
-fs::path loop_Output = "/home/peiweipan/Projects/DroidSlam/EurocData/Loop_Improve";
+fs::path loop_Output = "/home/peiweipan/Projects/DroidSlam/Euroc_Data/Loop_more";
 
 
 
@@ -225,18 +236,69 @@ std::vector<Sequence> transformToSequence(const std::vector<std::vector<SubData>
     }
     return sequences;
 }
+void processGroup(const std::vector<std::map<int, double>>& scores, GroupedSequence& gSeq, 
+                  std::vector<int>& currentGroup, int B) {
+    int a = gSeq.firstSet.back();
+    int b = currentGroup[0];
+    int c = currentGroup.back();
+    std::string order;
+    if (scores.at(a).at(b) > scores.at(a).at(c)) {
+        order = "Order";
+    } else {
+        order = "ReverseOrder";
+    }
+
+    if (order == "Order") {
+        while (currentGroup.back() < B) {
+            currentGroup.push_back(currentGroup.back() + 1);
+        }
+    } else {
+        while (currentGroup.front() > 0) {
+            currentGroup.insert(currentGroup.begin(), currentGroup.front() - 1);
+        }
+    }
+
+    gSeq.groupedSecondSets.push_back(currentGroup);
+    gSeq.orders.push_back(order);
+
+    std::vector<int> newGroup;
+    if (order == "Order") {
+        for (int i = 0; i < b; ++i) {
+            newGroup.push_back(i);
+        }
+        gSeq.orders.push_back("ReverseOrder");
+    } else {
+        for (int i = c + 1; i < B+1; ++i) {   //
+            newGroup.push_back(i);
+        }
+        gSeq.orders.push_back("Order");
+    }
+
+    if (!newGroup.empty()) {
+        gSeq.groupedSecondSets.push_back(newGroup);
+    }
+}
+
+
+
+
 
 std::vector<GroupedSequence> groupSecondSets(const std::vector<Sequence>& sequences,
-                                             const std::vector<std::map<int, double>>& scores) {
-    int N2 = scores.empty() ? 0 : scores[0].size();  // scores中第0个vector元素中的map元素个数
+                                             const std::vector<std::map<int, double>>& scores, 
+                                             int B, const double thresholdSecondConseutiveImages, const int neighborThreshold) {
+    int N2 = scores.empty() ? 0 : scores[0].size();
 
     std::vector<GroupedSequence> groupedSequences;
 
     for (const auto& seq : sequences) {
         GroupedSequence gSeq;
-        gSeq.firstSet = seq.firstSet;
+            // 如果seq.firstSet的元素数量大于40，只取最后40个元素
+        if (seq.firstSet.size() > 40) {
+            gSeq.firstSet.assign(seq.firstSet.end() - 40, seq.firstSet.end());
+        } else {
+            gSeq.firstSet = seq.firstSet;
+        }
 
-        // 逐个添加数字至gSeq.firstSet，直到达到10个元素或数字小于0
         while (gSeq.firstSet.size() < 40) {
             int nextNumber = gSeq.firstSet.front() - 1;
             if (nextNumber < 0) {
@@ -245,75 +307,32 @@ std::vector<GroupedSequence> groupSecondSets(const std::vector<Sequence>& sequen
             gSeq.firstSet.insert(gSeq.firstSet.begin(), nextNumber);
         }
 
-        int a = gSeq.firstSet.back();
-
         std::vector<int> currentGroup;
-        bool isGroupStart = true;  // 标记是否为新组的开始
+        bool isGroupStart = true;
         for (size_t i = 0; i < seq.secondSet.size(); ++i) {
             if (isGroupStart || abs(seq.secondSet[i] - seq.secondSet[i - 1]) <= neighborThreshold) {
                 currentGroup.push_back(seq.secondSet[i]);
                 isGroupStart = false;
             } else {
                 if (currentGroup.size() > thresholdSecondConseutiveImages) {
-                    int b = currentGroup[0];
-                    int c = currentGroup.back();
-                    std::string order;
-                    if (scores.at(a).at(b) > scores.at(a).at(c)) {
-                        order = "Order";
-                    } else {
-                        order = "ReverseOrder";
-                    }
-
-                    // 逐个添加数字至currentGroup，直到达到10个元素，同时确保数字在合理范围内
-                    if (order == "Order") {
-                        while (currentGroup.size() < 40 && currentGroup.back() < N2 - 1) {
-                            currentGroup.push_back(currentGroup.back() + 1);
-                        }
-                    } else { // ReverseOrder
-                        while (currentGroup.size() < 40 && currentGroup.front() > 0) {
-                            currentGroup.insert(currentGroup.begin(), currentGroup.front() - 1);
-                        }
-                    }
-
-                    gSeq.groupedSecondSets.push_back(currentGroup);
-                    gSeq.orders.push_back(order);
+                    processGroup(scores, gSeq, currentGroup, B);
                 }
                 currentGroup.clear();
-                currentGroup.push_back(seq.secondSet[i]); // 开始新组
+                currentGroup.push_back(seq.secondSet[i]);
                 isGroupStart = false;
             }
         }
 
         // 处理循环结束后的最后一组
-        if (currentGroup.size() > thresholdSecondConseutiveImages) {
-            int b = currentGroup[0];
-            int c = currentGroup.back();
-            std::string order;
-            if (scores.at(a).at(b) > scores.at(a).at(c)) {
-                order = "Order";
-            } else {
-                order = "ReverseOrder";
-            }
-
-            if (order == "Order") {
-                while (currentGroup.size() < 40 && currentGroup.back() < N2 - 1) {
-                    currentGroup.push_back(currentGroup.back() + 1);
-                }
-            } else {
-                while (currentGroup.size() < 40 && currentGroup.front() > 0) {
-                    currentGroup.insert(currentGroup.begin(), currentGroup.front() - 1);
-                }
-            }
-
-            gSeq.groupedSecondSets.push_back(currentGroup);
-            gSeq.orders.push_back(order);
+        if (!currentGroup.empty() && currentGroup.size() > thresholdSecondConseutiveImages) {
+            processGroup(scores, gSeq, currentGroup, B);
         }
 
         if (!gSeq.groupedSecondSets.empty()) {
             groupedSequences.push_back(gSeq);
         }
     }
-    
+
     return groupedSequences;
 }
 
@@ -486,11 +505,30 @@ bool isFileEmpty(const fs::path& folderPath) {
     return file.peek() == std::ifstream::traits_type::eof();
 }
 
+int getMaxKeyFromScores(const std::vector<std::map<int, double>>& scores) {
+    int maxKey = std::numeric_limits<int>::min(); // 初始设为int的最小值
+
+    for (const auto& scoreMap : scores) {
+        if (!scoreMap.empty()) {
+            int localMax = std::max_element(scoreMap.begin(), scoreMap.end(),
+                                            [](const auto& a, const auto& b) {
+                                                return a.first < b.first;
+                                            })->first;
+            maxKey = std::max(maxKey, localMax);
+        }
+    }
+
+    return maxKey;
+}
+
 int main() {
     std::ifstream file(GroupSequence);
     std::string line;
+    int iterationCount = 0; // 计数器
 
     while (std::getline(file, line)) {
+        auto [thresholdScore, ConsecutiveImages, neighborThresholdImages0, thresholdSecondConseutiveImages, neighborThreshold] = parameters[iterationCount % parameters.size()];
+
         int num1, num2;
         std::istringstream iss(line);
         if (!(iss >> num1 >> num2)) { break; } // 错误或行结束
@@ -539,7 +577,8 @@ int main() {
             std::vector<Sequence> sequences = transformToSequence(allConsecutiveData);
 
             //保证第1组照片中，每组子数据是满足要求的子序列，比如相邻数据之间的绝对值小于等于6，每组至少有10个数据
-            std::vector<GroupedSequence> BestSequences = groupSecondSets(sequences,scores);
+            int maxKey = getMaxKeyFromScores(scores);
+            std::vector<GroupedSequence> BestSequences = groupSecondSets(sequences,scores,maxKey,thresholdSecondConseutiveImages, neighborThreshold);
 
             auto Key_images_folders = findFoldersInCamFolders(cam0_Images, cam1_Images, num1, num2);
             fs::path outputFolder = createLoopFolder(loop_Output, num1, num2);
@@ -554,6 +593,7 @@ int main() {
                 break;
             }
         }while (true);
+        iterationCount++; // 增加计数器
     }
 
     return 0;

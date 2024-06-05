@@ -27,10 +27,8 @@ Pairs_Hilti/build/*
 Pairs_Hilti/Voc/*
 Hilti_Maps/*
 
-Pairs_VMap
+Pairs_VMap/build/*
+Pairs_VMap/Voc
+
 Vmap_Maps/*
 
-
-Euroc_Data
-Euroc_Data_more
-Euroc_Data_new
